@@ -3,12 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../core/locale_provider.dart';
 import '../../core/time_utils.dart';
-import '../../core/ui_mode.dart';
 import '../../data/database.dart';
 import '../../data/providers.dart';
 import '../../l10n/app_localizations.dart';
 import '../../notifications/notification_service.dart';
 import '../medications/add_medication_screen.dart';
+import '../profiles/profile_bar.dart';
 import '../settings/language_button.dart';
 
 enum _Period { morning, afternoon, evening, night }
@@ -27,8 +27,8 @@ String _periodLabel(AppLocalizations l10n, _Period p) => switch (p) {
       _Period.night => l10n.periodNight,
     };
 
-class StandardHomeScreen extends ConsumerWidget {
-  const StandardHomeScreen({super.key});
+class HomeScreen extends ConsumerWidget {
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -36,7 +36,10 @@ class StandardHomeScreen extends ConsumerWidget {
     ref.watch(todayKeyProvider); // gece yarısı yeniden çizim için
     final selected = ref.watch(selectedDateProvider);
     final dosesAsync = ref.watch(selectedDosesProvider);
-    final hasMeds = ref.watch(schedulesProvider).value?.isNotEmpty ?? false;
+    final activeProfile = ref.watch(activeProfileIdProvider);
+    final schedules = ref.watch(schedulesProvider).value;
+    final hasMeds =
+        schedules?.any((s) => s.profileId == activeProfile) ?? false;
     final db = ref.read(databaseProvider);
 
     final now = DateTime.now();
@@ -77,12 +80,6 @@ class StandardHomeScreen extends ConsumerWidget {
             onPressed: pickDate,
           ),
           const LanguageButton(),
-          IconButton(
-            tooltip: l10n.switchToLarge,
-            icon: const Icon(Icons.accessibility_new),
-            onPressed: () =>
-                ref.read(uiModeProvider.notifier).set(UiMode.large),
-          ),
           PopupMenuButton<String>(
             onSelected: (v) => NotificationService.instance
                 .scheduleTest(ref.read(localeProvider), alarm: v == 'alarm'),
@@ -96,6 +93,7 @@ class StandardHomeScreen extends ConsumerWidget {
       ),
       body: Column(
         children: [
+          const ProfileBar(),
           if (hasMeds)
             _DateStrip(
               selected: selected,
@@ -106,6 +104,9 @@ class StandardHomeScreen extends ConsumerWidget {
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Center(child: Text('Error: $e')),
               data: (doses) {
+                if (schedules == null) {
+                  return const Center(child: CircularProgressIndicator());
+                }
                 if (!hasMeds) return _EmptyState(onAdd: openAdd);
 
                 if (doses.isEmpty) {
@@ -199,7 +200,8 @@ class StandardHomeScreen extends ConsumerWidget {
   }
 }
 
-/// Yatay kaydırılabilir gün şeridi: bugünden 30 gün önce / 30 gün sonra
+/// Yatay kaydırılabilir gün şeridi: bugünden 30 gün önce / 30 gün sonra.
+/// Telefonun yazı boyutu büyükse şerit de büyür.
 class _DateStrip extends StatefulWidget {
   const _DateStrip({required this.selected, required this.onSelect});
   final DateTime selected;
@@ -211,10 +213,10 @@ class _DateStrip extends StatefulWidget {
 
 class _DateStripState extends State<_DateStrip> {
   static const _range = 30;
-  static const _itemWidth = 64.0;
 
   late final DateTime _today;
   final _controller = ScrollController();
+  double _itemWidth = 64;
 
   @override
   void initState() {
@@ -264,9 +266,12 @@ class _DateStripState extends State<_DateStrip> {
     final scheme = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
     final locale = Localizations.localeOf(context).toString();
+    final scale =
+        (MediaQuery.textScalerOf(context).scale(14) / 14).clamp(1.0, 1.8).toDouble();
+    _itemWidth = 64 * scale;
 
     return SizedBox(
-      height: 84,
+      height: 84 * scale,
       child: ListView.builder(
         controller: _controller,
         scrollDirection: Axis.horizontal,
@@ -274,8 +279,8 @@ class _DateStripState extends State<_DateStrip> {
         padding: const EdgeInsets.symmetric(vertical: 8),
         itemCount: _range * 2 + 1,
         itemBuilder: (context, i) {
-          final d = DateTime(
-              _today.year, _today.month, _today.day + i - _range);
+          final d =
+              DateTime(_today.year, _today.month, _today.day + i - _range);
           final isSel = d == widget.selected;
           final isToday = d == _today;
 
@@ -407,6 +412,7 @@ class _SummaryCard extends StatelessWidget {
                         Center(
                           child: Text(
                             '${(progress * 100).round()}%',
+                            textScaler: TextScaler.noScaling,
                             style: text.titleMedium?.copyWith(
                                 color: onC, fontWeight: FontWeight.w700),
                           ),
@@ -543,7 +549,7 @@ class _EmptyState extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,

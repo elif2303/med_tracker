@@ -407,6 +407,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select at least one day'**
   String get pickAtLeastOneDay;
+
+  /// No description provided for @me.
+  ///
+  /// In en, this message translates to:
+  /// **'Me'**
+  String get me;
+
+  /// No description provided for @addPerson.
+  ///
+  /// In en, this message translates to:
+  /// **'Add person'**
+  String get addPerson;
+
+  /// No description provided for @editPerson.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit person'**
+  String get editPerson;
+
+  /// No description provided for @personName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name (e.g. Mom)'**
+  String get personName;
+
+  /// No description provided for @color.
+  ///
+  /// In en, this message translates to:
+  /// **'Color'**
+  String get color;
+
+  /// No description provided for @deletePersonBody.
+  ///
+  /// In en, this message translates to:
+  /// **'All medicines and history of this person will be removed.'**
+  String get deletePersonBody;
+
+  /// No description provided for @forWhom.
+  ///
+  /// In en, this message translates to:
+  /// **'For'**
+  String get forWhom;
+
+  /// No description provided for @reminderTitleFor.
+  ///
+  /// In en, this message translates to:
+  /// **'{profile}: time for {name}'**
+  String reminderTitleFor(String profile, String name);
 }
 
 class _AppLocalizationsDelegate

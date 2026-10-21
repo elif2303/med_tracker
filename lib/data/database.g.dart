@@ -3,6 +3,298 @@
 part of 'database.dart';
 
 // ignore_for_file: type=lint
+class $ProfilesTable extends Profiles with TableInfo<$ProfilesTable, Profile> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ProfilesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _colorValueMeta = const VerificationMeta(
+    'colorValue',
+  );
+  @override
+  late final GeneratedColumn<int> colorValue = GeneratedColumn<int>(
+    'color_value',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isSelfMeta = const VerificationMeta('isSelf');
+  @override
+  late final GeneratedColumn<bool> isSelf = GeneratedColumn<bool>(
+    'is_self',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_self" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, colorValue, isSelf];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'profiles';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Profile> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    }
+    if (data.containsKey('color_value')) {
+      context.handle(
+        _colorValueMeta,
+        colorValue.isAcceptableOrUnknown(data['color_value']!, _colorValueMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_colorValueMeta);
+    }
+    if (data.containsKey('is_self')) {
+      context.handle(
+        _isSelfMeta,
+        isSelf.isAcceptableOrUnknown(data['is_self']!, _isSelfMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Profile map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Profile(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      colorValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}color_value'],
+      )!,
+      isSelf: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_self'],
+      )!,
+    );
+  }
+
+  @override
+  $ProfilesTable createAlias(String alias) {
+    return $ProfilesTable(attachedDatabase, alias);
+  }
+}
+
+class Profile extends DataClass implements Insertable<Profile> {
+  final int id;
+  final String name;
+  final int colorValue;
+  final bool isSelf;
+  const Profile({
+    required this.id,
+    required this.name,
+    required this.colorValue,
+    required this.isSelf,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['color_value'] = Variable<int>(colorValue);
+    map['is_self'] = Variable<bool>(isSelf);
+    return map;
+  }
+
+  ProfilesCompanion toCompanion(bool nullToAbsent) {
+    return ProfilesCompanion(
+      id: Value(id),
+      name: Value(name),
+      colorValue: Value(colorValue),
+      isSelf: Value(isSelf),
+    );
+  }
+
+  factory Profile.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Profile(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      colorValue: serializer.fromJson<int>(json['colorValue']),
+      isSelf: serializer.fromJson<bool>(json['isSelf']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'colorValue': serializer.toJson<int>(colorValue),
+      'isSelf': serializer.toJson<bool>(isSelf),
+    };
+  }
+
+  Profile copyWith({int? id, String? name, int? colorValue, bool? isSelf}) =>
+      Profile(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        colorValue: colorValue ?? this.colorValue,
+        isSelf: isSelf ?? this.isSelf,
+      );
+  Profile copyWithCompanion(ProfilesCompanion data) {
+    return Profile(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      colorValue: data.colorValue.present
+          ? data.colorValue.value
+          : this.colorValue,
+      isSelf: data.isSelf.present ? data.isSelf.value : this.isSelf,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Profile(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('colorValue: $colorValue, ')
+          ..write('isSelf: $isSelf')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, colorValue, isSelf);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Profile &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.colorValue == this.colorValue &&
+          other.isSelf == this.isSelf);
+}
+
+class ProfilesCompanion extends UpdateCompanion<Profile> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<int> colorValue;
+  final Value<bool> isSelf;
+  const ProfilesCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.colorValue = const Value.absent(),
+    this.isSelf = const Value.absent(),
+  });
+  ProfilesCompanion.insert({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    required int colorValue,
+    this.isSelf = const Value.absent(),
+  }) : colorValue = Value(colorValue);
+  static Insertable<Profile> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<int>? colorValue,
+    Expression<bool>? isSelf,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (colorValue != null) 'color_value': colorValue,
+      if (isSelf != null) 'is_self': isSelf,
+    });
+  }
+
+  ProfilesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<int>? colorValue,
+    Value<bool>? isSelf,
+  }) {
+    return ProfilesCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      colorValue: colorValue ?? this.colorValue,
+      isSelf: isSelf ?? this.isSelf,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (colorValue.present) {
+      map['color_value'] = Variable<int>(colorValue.value);
+    }
+    if (isSelf.present) {
+      map['is_self'] = Variable<bool>(isSelf.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProfilesCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('colorValue: $colorValue, ')
+          ..write('isSelf: $isSelf')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $MedicationsTable extends Medications
     with TableInfo<$MedicationsTable, Medication> {
   @override
@@ -109,6 +401,18 @@ class $MedicationsTable extends Medications
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _profileIdMeta = const VerificationMeta(
+    'profileId',
+  );
+  @override
+  late final GeneratedColumn<int> profileId = GeneratedColumn<int>(
+    'profile_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -131,6 +435,7 @@ class $MedicationsTable extends Medications
     daysMask,
     startDay,
     endDay,
+    profileId,
     createdAt,
   ];
   @override
@@ -192,6 +497,12 @@ class $MedicationsTable extends Medications
         endDay.isAcceptableOrUnknown(data['end_day']!, _endDayMeta),
       );
     }
+    if (data.containsKey('profile_id')) {
+      context.handle(
+        _profileIdMeta,
+        profileId.isAcceptableOrUnknown(data['profile_id']!, _profileIdMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -239,6 +550,10 @@ class $MedicationsTable extends Medications
         DriftSqlType.int,
         data['${effectivePrefix}end_day'],
       ),
+      profileId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}profile_id'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -267,6 +582,9 @@ class Medication extends DataClass implements Insertable<Medication> {
 
   /// Bitiş günü (yyyymmdd). null = süresiz
   final int? endDay;
+
+  /// Hangi profile ait. 1 = ilk oluşturulan "Ben" profili
+  final int profileId;
   final DateTime createdAt;
   const Medication({
     required this.id,
@@ -277,6 +595,7 @@ class Medication extends DataClass implements Insertable<Medication> {
     required this.daysMask,
     required this.startDay,
     this.endDay,
+    required this.profileId,
     required this.createdAt,
   });
   @override
@@ -292,6 +611,7 @@ class Medication extends DataClass implements Insertable<Medication> {
     if (!nullToAbsent || endDay != null) {
       map['end_day'] = Variable<int>(endDay);
     }
+    map['profile_id'] = Variable<int>(profileId);
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -308,6 +628,7 @@ class Medication extends DataClass implements Insertable<Medication> {
       endDay: endDay == null && nullToAbsent
           ? const Value.absent()
           : Value(endDay),
+      profileId: Value(profileId),
       createdAt: Value(createdAt),
     );
   }
@@ -326,6 +647,7 @@ class Medication extends DataClass implements Insertable<Medication> {
       daysMask: serializer.fromJson<int>(json['daysMask']),
       startDay: serializer.fromJson<int>(json['startDay']),
       endDay: serializer.fromJson<int?>(json['endDay']),
+      profileId: serializer.fromJson<int>(json['profileId']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -341,6 +663,7 @@ class Medication extends DataClass implements Insertable<Medication> {
       'daysMask': serializer.toJson<int>(daysMask),
       'startDay': serializer.toJson<int>(startDay),
       'endDay': serializer.toJson<int?>(endDay),
+      'profileId': serializer.toJson<int>(profileId),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -354,6 +677,7 @@ class Medication extends DataClass implements Insertable<Medication> {
     int? daysMask,
     int? startDay,
     Value<int?> endDay = const Value.absent(),
+    int? profileId,
     DateTime? createdAt,
   }) => Medication(
     id: id ?? this.id,
@@ -364,6 +688,7 @@ class Medication extends DataClass implements Insertable<Medication> {
     daysMask: daysMask ?? this.daysMask,
     startDay: startDay ?? this.startDay,
     endDay: endDay.present ? endDay.value : this.endDay,
+    profileId: profileId ?? this.profileId,
     createdAt: createdAt ?? this.createdAt,
   );
   Medication copyWithCompanion(MedicationsCompanion data) {
@@ -376,6 +701,7 @@ class Medication extends DataClass implements Insertable<Medication> {
       daysMask: data.daysMask.present ? data.daysMask.value : this.daysMask,
       startDay: data.startDay.present ? data.startDay.value : this.startDay,
       endDay: data.endDay.present ? data.endDay.value : this.endDay,
+      profileId: data.profileId.present ? data.profileId.value : this.profileId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -391,6 +717,7 @@ class Medication extends DataClass implements Insertable<Medication> {
           ..write('daysMask: $daysMask, ')
           ..write('startDay: $startDay, ')
           ..write('endDay: $endDay, ')
+          ..write('profileId: $profileId, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -406,6 +733,7 @@ class Medication extends DataClass implements Insertable<Medication> {
     daysMask,
     startDay,
     endDay,
+    profileId,
     createdAt,
   );
   @override
@@ -420,6 +748,7 @@ class Medication extends DataClass implements Insertable<Medication> {
           other.daysMask == this.daysMask &&
           other.startDay == this.startDay &&
           other.endDay == this.endDay &&
+          other.profileId == this.profileId &&
           other.createdAt == this.createdAt);
 }
 
@@ -432,6 +761,7 @@ class MedicationsCompanion extends UpdateCompanion<Medication> {
   final Value<int> daysMask;
   final Value<int> startDay;
   final Value<int?> endDay;
+  final Value<int> profileId;
   final Value<DateTime> createdAt;
   const MedicationsCompanion({
     this.id = const Value.absent(),
@@ -442,6 +772,7 @@ class MedicationsCompanion extends UpdateCompanion<Medication> {
     this.daysMask = const Value.absent(),
     this.startDay = const Value.absent(),
     this.endDay = const Value.absent(),
+    this.profileId = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
   MedicationsCompanion.insert({
@@ -453,6 +784,7 @@ class MedicationsCompanion extends UpdateCompanion<Medication> {
     this.daysMask = const Value.absent(),
     this.startDay = const Value.absent(),
     this.endDay = const Value.absent(),
+    this.profileId = const Value.absent(),
     this.createdAt = const Value.absent(),
   }) : name = Value(name);
   static Insertable<Medication> custom({
@@ -464,6 +796,7 @@ class MedicationsCompanion extends UpdateCompanion<Medication> {
     Expression<int>? daysMask,
     Expression<int>? startDay,
     Expression<int>? endDay,
+    Expression<int>? profileId,
     Expression<DateTime>? createdAt,
   }) {
     return RawValuesInsertable({
@@ -475,6 +808,7 @@ class MedicationsCompanion extends UpdateCompanion<Medication> {
       if (daysMask != null) 'days_mask': daysMask,
       if (startDay != null) 'start_day': startDay,
       if (endDay != null) 'end_day': endDay,
+      if (profileId != null) 'profile_id': profileId,
       if (createdAt != null) 'created_at': createdAt,
     });
   }
@@ -488,6 +822,7 @@ class MedicationsCompanion extends UpdateCompanion<Medication> {
     Value<int>? daysMask,
     Value<int>? startDay,
     Value<int?>? endDay,
+    Value<int>? profileId,
     Value<DateTime>? createdAt,
   }) {
     return MedicationsCompanion(
@@ -499,6 +834,7 @@ class MedicationsCompanion extends UpdateCompanion<Medication> {
       daysMask: daysMask ?? this.daysMask,
       startDay: startDay ?? this.startDay,
       endDay: endDay ?? this.endDay,
+      profileId: profileId ?? this.profileId,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -530,6 +866,9 @@ class MedicationsCompanion extends UpdateCompanion<Medication> {
     if (endDay.present) {
       map['end_day'] = Variable<int>(endDay.value);
     }
+    if (profileId.present) {
+      map['profile_id'] = Variable<int>(profileId.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -547,6 +886,7 @@ class MedicationsCompanion extends UpdateCompanion<Medication> {
           ..write('daysMask: $daysMask, ')
           ..write('startDay: $startDay, ')
           ..write('endDay: $endDay, ')
+          ..write('profileId: $profileId, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -1126,6 +1466,7 @@ class IntakeLogsCompanion extends UpdateCompanion<IntakeLog> {
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
+  late final $ProfilesTable profiles = $ProfilesTable(this);
   late final $MedicationsTable medications = $MedicationsTable(this);
   late final $RemindersTable reminders = $RemindersTable(this);
   late final $IntakeLogsTable intakeLogs = $IntakeLogsTable(this);
@@ -1134,6 +1475,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
+    profiles,
     medications,
     reminders,
     intakeLogs,
@@ -1157,6 +1499,184 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   ]);
 }
 
+typedef $$ProfilesTableCreateCompanionBuilder = ProfilesCompanion Function({
+  Value<int> id,
+  Value<String> name,
+  required int colorValue,
+  Value<bool> isSelf,
+});
+typedef $$ProfilesTableUpdateCompanionBuilder = ProfilesCompanion Function({
+  Value<int> id,
+  Value<String> name,
+  Value<int> colorValue,
+  Value<bool> isSelf,
+});
+
+class $$ProfilesTableFilterComposer
+    extends Composer<_$AppDatabase, $ProfilesTable> {
+  $$ProfilesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get colorValue => $composableBuilder(
+    column: $table.colorValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isSelf => $composableBuilder(
+    column: $table.isSelf,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ProfilesTableOrderingComposer
+    extends Composer<_$AppDatabase, $ProfilesTable> {
+  $$ProfilesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get colorValue => $composableBuilder(
+    column: $table.colorValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isSelf => $composableBuilder(
+    column: $table.isSelf,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ProfilesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ProfilesTable> {
+  $$ProfilesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get colorValue => $composableBuilder(
+    column: $table.colorValue,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isSelf =>
+      $composableBuilder(column: $table.isSelf, builder: (column) => column);
+}
+
+class $$ProfilesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ProfilesTable,
+          Profile,
+          $$ProfilesTableFilterComposer,
+          $$ProfilesTableOrderingComposer,
+          $$ProfilesTableAnnotationComposer,
+          $$ProfilesTableCreateCompanionBuilder,
+          $$ProfilesTableUpdateCompanionBuilder,
+          (Profile, BaseReferences<_$AppDatabase, $ProfilesTable, Profile>),
+          Profile,
+          PrefetchHooks Function()
+        > {
+  $$ProfilesTableTableManager(_$AppDatabase db, $ProfilesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ProfilesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ProfilesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ProfilesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<int> colorValue = const Value.absent(),
+                Value<bool> isSelf = const Value.absent(),
+              }) => ProfilesCompanion(
+                id: id,
+                name: name,
+                colorValue: colorValue,
+                isSelf: isSelf,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                required int colorValue,
+                Value<bool> isSelf = const Value.absent(),
+              }) => ProfilesCompanion.insert(
+                id: id,
+                name: name,
+                colorValue: colorValue,
+                isSelf: isSelf,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ProfilesTable, Profile>(table),
+                  BaseReferences<_$AppDatabase, $ProfilesTable, Profile>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ProfilesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ProfilesTable,
+      Profile,
+      $$ProfilesTableFilterComposer,
+      $$ProfilesTableOrderingComposer,
+      $$ProfilesTableAnnotationComposer,
+      $$ProfilesTableCreateCompanionBuilder,
+      $$ProfilesTableUpdateCompanionBuilder,
+      (Profile, BaseReferences<_$AppDatabase, $ProfilesTable, Profile>),
+      Profile,
+      PrefetchHooks Function()
+    >;
 typedef $$MedicationsTableCreateCompanionBuilder =
     MedicationsCompanion Function({
       Value<int> id,
@@ -1167,6 +1687,7 @@ typedef $$MedicationsTableCreateCompanionBuilder =
       Value<int> daysMask,
       Value<int> startDay,
       Value<int?> endDay,
+      Value<int> profileId,
       Value<DateTime> createdAt,
     });
 typedef $$MedicationsTableUpdateCompanionBuilder =
@@ -1179,6 +1700,7 @@ typedef $$MedicationsTableUpdateCompanionBuilder =
       Value<int> daysMask,
       Value<int> startDay,
       Value<int?> endDay,
+      Value<int> profileId,
       Value<DateTime> createdAt,
     });
 
@@ -1251,6 +1773,11 @@ class $$MedicationsTableFilterComposer
 
   ColumnFilters<int> get endDay => $composableBuilder(
     column: $table.endDay,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get profileId => $composableBuilder(
+    column: $table.profileId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1334,6 +1861,11 @@ class $$MedicationsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get profileId => $composableBuilder(
+    column: $table.profileId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -1372,6 +1904,9 @@ class $$MedicationsTableAnnotationComposer
 
   GeneratedColumn<int> get endDay =>
       $composableBuilder(column: $table.endDay, builder: (column) => column);
+
+  GeneratedColumn<int> get profileId =>
+      $composableBuilder(column: $table.profileId, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -1438,6 +1973,7 @@ class $$MedicationsTableTableManager
                 Value<int> daysMask = const Value.absent(),
                 Value<int> startDay = const Value.absent(),
                 Value<int?> endDay = const Value.absent(),
+                Value<int> profileId = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
               }) => MedicationsCompanion(
                 id: id,
@@ -1448,6 +1984,7 @@ class $$MedicationsTableTableManager
                 daysMask: daysMask,
                 startDay: startDay,
                 endDay: endDay,
+                profileId: profileId,
                 createdAt: createdAt,
               ),
           createCompanionCallback:
@@ -1460,6 +1997,7 @@ class $$MedicationsTableTableManager
                 Value<int> daysMask = const Value.absent(),
                 Value<int> startDay = const Value.absent(),
                 Value<int?> endDay = const Value.absent(),
+                Value<int> profileId = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
               }) => MedicationsCompanion.insert(
                 id: id,
@@ -1470,6 +2008,7 @@ class $$MedicationsTableTableManager
                 daysMask: daysMask,
                 startDay: startDay,
                 endDay: endDay,
+                profileId: profileId,
                 createdAt: createdAt,
               ),
           withReferenceMapper: (p0) => p0
@@ -2184,6 +2723,8 @@ typedef $$IntakeLogsTableProcessedTableManager =
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
+  $$ProfilesTableTableManager get profiles =>
+      $$ProfilesTableTableManager(_db, _db.profiles);
   $$MedicationsTableTableManager get medications =>
       $$MedicationsTableTableManager(_db, _db.medications);
   $$RemindersTableTableManager get reminders =>

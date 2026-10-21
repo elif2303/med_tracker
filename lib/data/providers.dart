@@ -1,9 +1,9 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../core/time_utils.dart';
-import 'database.dart';
-import '../notifications/notification_service.dart';
-import '../core/locale_provider.dart';
 import 'dart:async';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../core/locale_provider.dart';
+import '../core/time_utils.dart';
+import '../notifications/notification_service.dart';
+import 'database.dart';
 
 final databaseProvider = Provider<AppDatabase>((ref) {
   final db = AppDatabase();
@@ -23,28 +23,31 @@ final todayKeyProvider = Provider<int>((ref) {
   return dayKeyOf(now);
 });
 
-final todayDosesProvider = StreamProvider<List<DoseItem>>((ref) {
-  final db = ref.watch(databaseProvider);
-  final key = ref.watch(todayKeyProvider);
-  return db.watchDoses(key);
+// ---------- Profiller ----------
+
+final profilesProvider = StreamProvider<List<Profile>>((ref) {
+  return ref.watch(databaseProvider).watchProfiles();
 });
 
-final schedulesProvider = StreamProvider<List<ScheduleItem>>((ref) {
-  return ref.watch(databaseProvider).watchSchedules();
+class SelectedProfileNotifier extends Notifier<int?> {
+  @override
+  int? build() => null;
+
+  void set(int id) => state = id;
+}
+
+final selectedProfileProvider =
+    NotifierProvider<SelectedProfileNotifier, int?>(SelectedProfileNotifier.new);
+
+/// Seçili profil geçerli değilse (silindi, henüz seçilmedi) ilk profile düşer
+final activeProfileIdProvider = Provider<int?>((ref) {
+  final profiles = ref.watch(profilesProvider).value;
+  if (profiles == null || profiles.isEmpty) return null;
+  final selected = ref.watch(selectedProfileProvider);
+  return profiles.any((p) => p.id == selected) ? selected : profiles.first.id;
 });
 
-/// İlaç eklenince/silinince bildirimleri otomatik yeniden planlar
-final notificationSyncProvider = Provider<void>((ref) {
-  void sync() {
-    final locale = ref.read(localeProvider);
-    ref.read(schedulesProvider).whenData(
-          (items) => NotificationService.instance.reschedule(items, locale),
-        );
-  }
-
-  ref.listen(schedulesProvider, (_, __) => sync(), fireImmediately: true);
-  ref.listen(localeProvider, (_, __) => sync());
-});
+// ---------- Takvim ----------
 
 class SelectedDateNotifier extends Notifier<DateTime> {
   @override
@@ -59,9 +62,36 @@ class SelectedDateNotifier extends Notifier<DateTime> {
 final selectedDateProvider =
     NotifierProvider<SelectedDateNotifier, DateTime>(SelectedDateNotifier.new);
 
-/// Takvimde seçili günün dozları (büyük mod hâlâ todayDosesProvider kullanır)
+/// Seçili profilin, seçili gündeki dozları
 final selectedDosesProvider = StreamProvider<List<DoseItem>>((ref) {
   final db = ref.watch(databaseProvider);
   final date = ref.watch(selectedDateProvider);
-  return db.watchDoses(dayKeyOf(date));
+  final profileId = ref.watch(activeProfileIdProvider);
+  if (profileId == null) return const Stream.empty();
+  return db.watchDoses(dayKeyOf(date), profileId);
+});
+
+// ---------- Bildirimler ----------
+
+final schedulesProvider = StreamProvider<List<ScheduleItem>>((ref) {
+  return ref.watch(databaseProvider).watchSchedules();
+});
+
+/// İlaç/profil/dil değişince bildirimleri otomatik yeniden planlar
+final notificationSyncProvider = Provider<void>((ref) {
+  void sync() {
+    final locale = ref.read(localeProvider);
+    final items = ref.read(schedulesProvider).value;
+    final profiles = ref.read(profilesProvider).value;
+    if (items == null || profiles == null) return;
+    NotificationService.instance.reschedule(
+      items,
+      locale,
+      showProfile: profiles.length > 1,
+    );
+  }
+
+  ref.listen(schedulesProvider, (_, __) => sync(), fireImmediately: true);
+  ref.listen(profilesProvider, (_, __) => sync());
+  ref.listen(localeProvider, (_, __) => sync());
 });

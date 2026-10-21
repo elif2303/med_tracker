@@ -50,5 +50,13 @@
   "startDate": "Startdatum",
   "endDate": "Enddatum",
   "noEndDate": "Kein Enddatum (fortlaufend)",
-  "pickAtLeastOneDay": "Wähle mindestens einen Tag"
+  "pickAtLeastOneDay": "Wähle mindestens einen Tag",
+  "me": "Ich",
+  "addPerson": "Person hinzufügen",
+  "editPerson": "Person bearbeiten",
+  "personName": "Name (z. B. Mama)",
+  "color": "Farbe",
+  "deletePersonBody": "Alle Medikamente und der Verlauf dieser Person werden entfernt.",
+  "forWhom": "Für",
+  "reminderTitleFor": "{profile}: Zeit für {name}"
 }

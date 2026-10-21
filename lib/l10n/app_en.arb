@@ -55,5 +55,14 @@
   "startDate": "Start date",
   "endDate": "End date",
   "noEndDate": "No end date (ongoing)",
-  "pickAtLeastOneDay": "Select at least one day"
+  "pickAtLeastOneDay": "Select at least one day",
+  "me": "Me",
+  "addPerson": "Add person",
+  "editPerson": "Edit person",
+  "personName": "Name (e.g. Mom)",
+  "color": "Color",
+  "deletePersonBody": "All medicines and history of this person will be removed.",
+  "forWhom": "For",
+  "reminderTitleFor": "{profile}: time for {name}",
+  "@reminderTitleFor": { "placeholders": { "profile": { "type": "String" }, "name": { "type": "String" } } }
 }

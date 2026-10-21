@@ -175,4 +175,31 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get pickAtLeastOneDay => 'Wähle mindestens einen Tag';
+
+  @override
+  String get me => 'Ich';
+
+  @override
+  String get addPerson => 'Person hinzufügen';
+
+  @override
+  String get editPerson => 'Person bearbeiten';
+
+  @override
+  String get personName => 'Name (z. B. Mama)';
+
+  @override
+  String get color => 'Farbe';
+
+  @override
+  String get deletePersonBody =>
+      'Alle Medikamente und der Verlauf dieser Person werden entfernt.';
+
+  @override
+  String get forWhom => 'Für';
+
+  @override
+  String reminderTitleFor(String profile, String name) {
+    return '$profile: Zeit für $name';
+  }
 }

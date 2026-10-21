@@ -8,6 +8,7 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
+import '../core/profile_utils.dart';
 import '../core/time_utils.dart';
 import '../data/database.dart';
 import '../l10n/app_localizations.dart';
@@ -19,6 +20,7 @@ class NotificationService {
   final _plugin = FlutterLocalNotificationsPlugin();
   bool _ready = false;
   Locale? _locale;
+  Future<void> _queue = Future.value();
 
   /// "Aldım" butonuna basılınca çağrılır (main.dart'ta bağlanır)
   Future<void> Function(int reminderId)? onTaken;
@@ -138,8 +140,25 @@ class NotificationService {
       jsonEncode(
           {'id': reminderId, 'alarm': alarm, 'title': title, 'body': body});
 
-  /// Tüm planı baştan kurar. Uygulama her açıldığında ve ilaç değiştiğinde çalışır.
-  Future<void> reschedule(List<ScheduleItem> items, Locale? locale) async {
+  /// Tüm planı baştan kurar. İstekler sıraya girer, aynı anda iki planlama çalışmaz.
+  Future<void> reschedule(
+    List<ScheduleItem> items,
+    Locale? locale, {
+    required bool showProfile,
+  }) {
+    _queue = _queue
+        .then((_) => _reschedule(items, locale, showProfile))
+        .catchError((Object e) {
+      debugPrint('reschedule failed: $e');
+    });
+    return _queue;
+  }
+
+  Future<void> _reschedule(
+    List<ScheduleItem> items,
+    Locale? locale,
+    bool showProfile,
+  ) async {
     if (!_ready) return;
     _locale = locale;
     final l10n = await _l10n(locale);
@@ -151,7 +170,10 @@ class NotificationService {
     for (final item in items) {
       final h = item.minuteOfDay ~/ 60;
       final m = item.minuteOfDay % 60;
-      final title = l10n.reminderTitle(item.name);
+      final title = showProfile
+          ? l10n.reminderTitleFor(
+              profileLabel(l10n, item.profileName), item.name)
+          : l10n.reminderTitle(item.name);
       final body = doseLine(item.minuteOfDay, item.dose);
       final details = _details(l10n, alarm: item.useAlarm);
       final payload = _payload(item.reminderId, item.useAlarm, title, body);
@@ -167,7 +189,8 @@ class NotificationService {
           if (key < item.startDay) continue;
           if (!maskHasDay(item.daysMask, day.weekday)) continue;
 
-          final when = tz.TZDateTime(tz.local, day.year, day.month, day.day, h, m);
+          final when =
+              tz.TZDateTime(tz.local, day.year, day.month, day.day, h, m);
           if (!when.isAfter(now)) continue;
 
           await _plugin.zonedSchedule(
@@ -184,7 +207,8 @@ class NotificationService {
         // Her gün: tek tekrarlayan bildirim
         var when = tz.TZDateTime(tz.local, now.year, now.month, now.day, h, m);
         if (!when.isAfter(now)) {
-          when = tz.TZDateTime(tz.local, now.year, now.month, now.day + 1, h, m);
+          when =
+              tz.TZDateTime(tz.local, now.year, now.month, now.day + 1, h, m);
         }
         await _plugin.zonedSchedule(
           id: item.reminderId * 100,

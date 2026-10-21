@@ -50,5 +50,13 @@
   "startDate": "Başlangıç tarihi",
   "endDate": "Bitiş tarihi",
   "noEndDate": "Bitiş yok (devam ediyor)",
-  "pickAtLeastOneDay": "En az bir gün seç"
+  "pickAtLeastOneDay": "En az bir gün seç",
+  "me": "Ben",
+  "addPerson": "Kişi ekle",
+  "editPerson": "Kişiyi düzenle",
+  "personName": "Ad (örn. Annem)",
+  "color": "Renk",
+  "deletePersonBody": "Bu kişinin tüm ilaçları ve geçmişi silinecek.",
+  "forWhom": "Kimin için",
+  "reminderTitleFor": "{profile}: {name} zamanı"
 }

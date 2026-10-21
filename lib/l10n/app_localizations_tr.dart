@@ -174,4 +174,31 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get pickAtLeastOneDay => 'En az bir gün seç';
+
+  @override
+  String get me => 'Ben';
+
+  @override
+  String get addPerson => 'Kişi ekle';
+
+  @override
+  String get editPerson => 'Kişiyi düzenle';
+
+  @override
+  String get personName => 'Ad (örn. Annem)';
+
+  @override
+  String get color => 'Renk';
+
+  @override
+  String get deletePersonBody =>
+      'Bu kişinin tüm ilaçları ve geçmişi silinecek.';
+
+  @override
+  String get forWhom => 'Kimin için';
+
+  @override
+  String reminderTitleFor(String profile, String name) {
+    return '$profile: $name zamanı';
+  }
 }

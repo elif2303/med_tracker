@@ -50,5 +50,13 @@
   "startDate": "تاريخ البداية",
   "endDate": "تاريخ الانتهاء",
   "noEndDate": "بدون تاريخ انتهاء (مستمر)",
-  "pickAtLeastOneDay": "اختر يومًا واحدًا على الأقل"
+  "pickAtLeastOneDay": "اختر يومًا واحدًا على الأقل",
+  "me": "أنا",
+  "addPerson": "إضافة شخص",
+  "editPerson": "تعديل الشخص",
+  "personName": "الاسم (مثال: أمي)",
+  "color": "اللون",
+  "deletePersonBody": "سيتم حذف جميع أدوية هذا الشخص وسجله.",
+  "forWhom": "لمن",
+  "reminderTitleFor": "{profile}: حان موعد {name}"
 }

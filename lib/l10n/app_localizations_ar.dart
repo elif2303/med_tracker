@@ -172,4 +172,30 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get pickAtLeastOneDay => 'اختر يومًا واحدًا على الأقل';
+
+  @override
+  String get me => 'أنا';
+
+  @override
+  String get addPerson => 'إضافة شخص';
+
+  @override
+  String get editPerson => 'تعديل الشخص';
+
+  @override
+  String get personName => 'الاسم (مثال: أمي)';
+
+  @override
+  String get color => 'اللون';
+
+  @override
+  String get deletePersonBody => 'سيتم حذف جميع أدوية هذا الشخص وسجله.';
+
+  @override
+  String get forWhom => 'لمن';
+
+  @override
+  String reminderTitleFor(String profile, String name) {
+    return '$profile: حان موعد $name';
+  }
 }

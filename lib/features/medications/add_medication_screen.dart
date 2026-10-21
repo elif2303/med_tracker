@@ -5,6 +5,7 @@ import '../../core/time_utils.dart';
 import '../../data/providers.dart';
 import '../../l10n/app_localizations.dart';
 import '../../notifications/notification_service.dart';
+import '../../core/profile_utils.dart';
 
 class AddMedicationScreen extends ConsumerStatefulWidget {
   const AddMedicationScreen({super.key});
@@ -23,12 +24,14 @@ class _AddMedicationScreenState extends ConsumerState<AddMedicationScreen> {
   int _mask = 127;
   late DateTime _start;
   DateTime? _end;
+  int? _profileId;
 
   @override
   void initState() {
     super.initState();
     final n = DateTime.now();
     _start = DateTime(n.year, n.month, n.day);
+    _profileId = ref.read(activeProfileIdProvider);
   }
 
   @override
@@ -94,6 +97,8 @@ class _AddMedicationScreenState extends ConsumerState<AddMedicationScreen> {
           .showSnackBar(SnackBar(content: Text(l10n.pickAtLeastOneDay)));
       return;
     }
+    final pid = _profileId ?? ref.read(activeProfileIdProvider);
+    if (pid == null) return;
     await ref.read(databaseProvider).addMedication(
           name: _name.text.trim(),
           dose: _dose.text.trim(),
@@ -102,7 +107,9 @@ class _AddMedicationScreenState extends ConsumerState<AddMedicationScreen> {
           daysMask: _mask,
           startDay: dayKeyOf(_start),
           endDay: _end == null ? null : dayKeyOf(_end!),
+          profileId: pid,
         );
+    ref.read(selectedProfileProvider.notifier).set(pid);
     if (mounted) Navigator.of(context).pop();
   }
 
@@ -112,6 +119,7 @@ class _AddMedicationScreenState extends ConsumerState<AddMedicationScreen> {
     final locale = Localizations.localeOf(context).toString();
     final dateFmt = DateFormat.yMMMd(locale);
     final titleStyle = Theme.of(context).textTheme.titleMedium;
+    final profiles = ref.watch(profilesProvider).value ?? const [];
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.addMedicine)),
@@ -120,6 +128,24 @@ class _AddMedicationScreenState extends ConsumerState<AddMedicationScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            if (profiles.length > 1) ...[
+              Text(l10n.forWhom, style: titleStyle),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                children: [
+                  for (final p in profiles)
+                    ChoiceChip(
+                      avatar: CircleAvatar(
+                          backgroundColor: Color(p.colorValue), radius: 10),
+                      label: Text(profileLabel(l10n, p.name)),
+                      selected: _profileId == p.id,
+                      onSelected: (_) => setState(() => _profileId = p.id),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 16),
+            ],
             TextFormField(
               controller: _name,
               textCapitalization: TextCapitalization.sentences,

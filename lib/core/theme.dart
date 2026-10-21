@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'ui_mode.dart';
 
-ThemeData buildTheme(UiMode mode, Brightness brightness) {
-  final large = mode == UiMode.large;
+ThemeData buildTheme(Brightness brightness) {
   final scheme = ColorScheme.fromSeed(
     seedColor: const Color(0xFF00897B),
     brightness: brightness,
@@ -12,7 +10,6 @@ ThemeData buildTheme(UiMode mode, Brightness brightness) {
     useMaterial3: true,
     colorScheme: scheme,
     scaffoldBackgroundColor: scheme.surface,
-    visualDensity: large ? VisualDensity.comfortable : VisualDensity.standard,
     appBarTheme: AppBarTheme(
       centerTitle: false,
       backgroundColor: scheme.surface,
@@ -37,18 +34,14 @@ ThemeData buildTheme(UiMode mode, Brightness brightness) {
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
-        minimumSize: Size(double.infinity, large ? 80 : 52),
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(large ? 24 : 16)),
-        textStyle: TextStyle(
-          fontSize: large ? 22 : 18,
-          fontWeight: FontWeight.w600,
-        ),
+        minimumSize: const Size(double.infinity, 52),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        minimumSize: Size(double.infinity, large ? 64 : 48),
+        minimumSize: const Size(double.infinity, 48),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     ),
