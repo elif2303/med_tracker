@@ -198,4 +198,88 @@ class AppLocalizationsAr extends AppLocalizations {
   String reminderTitleFor(String profile, String name) {
     return '$profile: حان موعد $name';
   }
+
+  @override
+  String get settings => 'الإعدادات';
+
+  @override
+  String get showNameInNotification => 'إظهار اسم الشخص في الإشعارات';
+
+  @override
+  String get showNameInNotificationHint => 'يمكن لأي شخص يرى شاشة القفل قراءته';
+
+  @override
+  String get testSection => 'اختبار';
+
+  @override
+  String get medicalDisclaimer =>
+      'تطبيق Med Tracker أداة تذكير ولا يقدم نصائح طبية. اتبع دائمًا تعليمات طبيبك.';
+
+  @override
+  String get editMedicine => 'تعديل الدواء';
+
+  @override
+  String get edit => 'تعديل';
+
+  @override
+  String get next => 'التالي';
+
+  @override
+  String get back => 'السابق';
+
+  @override
+  String get obWelcomeTitle => 'مرحبًا بك في Med Tracker';
+
+  @override
+  String get obWelcomeBody =>
+      'لا تفوّت أي جرعة. تذكيرات بسيطة لك وللأشخاص الذين تعتني بهم.';
+
+  @override
+  String get obDisclaimerTitle => 'قبل أن تبدأ';
+
+  @override
+  String get obDataLocal =>
+      'تُحفظ أدويتك وسجلك على هذا الهاتف فقط. إذا حذفت التطبيق أو غيّرت هاتفك فسيتم فقدانها.';
+
+  @override
+  String get obAgree => 'فهمت وأوافق';
+
+  @override
+  String get obPermTitle => 'السماح بالتذكيرات';
+
+  @override
+  String get obPermBody =>
+      'لتذكيرك في الوقت المناسب، يحتاج Med Tracker إلى إذنك:';
+
+  @override
+  String get obPermNotif => 'الإشعارات، لعرض التذكيرات';
+
+  @override
+  String get obPermExact =>
+      'المنبهات الدقيقة، لتصل التذكيرات في موعدها لا متأخرة بدقائق';
+
+  @override
+  String get obAllow => 'السماح';
+
+  @override
+  String get obNotNow => 'ليس الآن';
+
+  @override
+  String get obBatteryTitle => 'حافظ على موثوقية التذكيرات';
+
+  @override
+  String get obBatteryBody =>
+      'بعض الهواتف (سامسونج وشاومي وهواوي وغيرها) توقف التطبيقات لتوفير البطارية، مما قد يؤخر التذكيرات. افتح الإعدادات، ثم البطارية، واختر «غير مقيّد».';
+
+  @override
+  String get obOpenSettings => 'فتح الإعدادات';
+
+  @override
+  String get obGetStarted => 'ابدأ';
+
+  @override
+  String get close => 'إغلاق';
+
+  @override
+  String get privacyPolicy => 'سياسة الخصوصية';
 }

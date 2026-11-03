@@ -1,30 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../core/profile_utils.dart';
 import '../../core/time_utils.dart';
 import '../../data/providers.dart';
 import '../../l10n/app_localizations.dart';
 import '../../notifications/notification_service.dart';
-import '../../core/profile_utils.dart';
 
-class AddMedicationScreen extends ConsumerStatefulWidget {
-  const AddMedicationScreen({super.key});
+/// medicationId == null ise yeni ilaç ekler, doluysa o ilacı düzenler
+class MedicationFormScreen extends ConsumerStatefulWidget {
+  const MedicationFormScreen({super.key, this.medicationId});
+  final int? medicationId;
 
   @override
-  ConsumerState<AddMedicationScreen> createState() =>
-      _AddMedicationScreenState();
+  ConsumerState<MedicationFormScreen> createState() =>
+      _MedicationFormScreenState();
 }
 
-class _AddMedicationScreenState extends ConsumerState<AddMedicationScreen> {
+class _MedicationFormScreenState extends ConsumerState<MedicationFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _name = TextEditingController();
   final _dose = TextEditingController();
-  final List<int> _times = [8 * 60];
+  List<int> _times = [8 * 60];
   bool _alarm = false;
   int _mask = 127;
   late DateTime _start;
   DateTime? _end;
   int? _profileId;
+  bool _loading = false;
+
+  bool get _editing => widget.medicationId != null;
 
   @override
   void initState() {
@@ -32,6 +37,34 @@ class _AddMedicationScreenState extends ConsumerState<AddMedicationScreen> {
     final n = DateTime.now();
     _start = DateTime(n.year, n.month, n.day);
     _profileId = ref.read(activeProfileIdProvider);
+    if (_editing) {
+      _loading = true;
+      _load();
+    }
+  }
+
+  Future<void> _load() async {
+    final data = await ref
+        .read(databaseProvider)
+        .getMedicationForEdit(widget.medicationId!);
+    if (!mounted) return;
+    if (data == null) {
+      Navigator.of(context).pop();
+      return;
+    }
+    final m = data.med;
+    setState(() {
+      _name.text = m.name;
+      _dose.text = m.dose;
+      _times = [...data.minutes];
+      _alarm = m.useAlarm;
+      _mask = m.daysMask;
+      _start =
+          dateOfDayKey(m.startDay != 0 ? m.startDay : dayKeyOf(m.createdAt));
+      _end = m.endDay == null ? null : dateOfDayKey(m.endDay!);
+      _profileId = m.profileId;
+      _loading = false;
+    });
   }
 
   @override
@@ -55,12 +88,13 @@ class _AddMedicationScreenState extends ConsumerState<AddMedicationScreen> {
   }
 
   Future<void> _pickStart() async {
-    final today = DateTime.now();
+    final t = DateTime.now();
+    final limit = DateTime(t.year, t.month, t.day - 30);
     final picked = await showDatePicker(
       context: context,
       initialDate: _start,
-      firstDate: DateTime(today.year, today.month, today.day - 30),
-      lastDate: DateTime(today.year + 2, today.month, today.day),
+      firstDate: _start.isBefore(limit) ? _start : limit,
+      lastDate: DateTime(t.year + 2, t.month, t.day),
     );
     if (picked == null) return;
     setState(() {
@@ -99,16 +133,33 @@ class _AddMedicationScreenState extends ConsumerState<AddMedicationScreen> {
     }
     final pid = _profileId ?? ref.read(activeProfileIdProvider);
     if (pid == null) return;
-    await ref.read(databaseProvider).addMedication(
-          name: _name.text.trim(),
-          dose: _dose.text.trim(),
-          minutes: _times,
-          useAlarm: _alarm,
-          daysMask: _mask,
-          startDay: dayKeyOf(_start),
-          endDay: _end == null ? null : dayKeyOf(_end!),
-          profileId: pid,
-        );
+
+    final db = ref.read(databaseProvider);
+    final endKey = _end == null ? null : dayKeyOf(_end!);
+    if (_editing) {
+      await db.updateMedication(
+        id: widget.medicationId!,
+        name: _name.text.trim(),
+        dose: _dose.text.trim(),
+        minutes: _times,
+        useAlarm: _alarm,
+        daysMask: _mask,
+        startDay: dayKeyOf(_start),
+        endDay: endKey,
+        profileId: pid,
+      );
+    } else {
+      await db.addMedication(
+        name: _name.text.trim(),
+        dose: _dose.text.trim(),
+        minutes: _times,
+        useAlarm: _alarm,
+        daysMask: _mask,
+        startDay: dayKeyOf(_start),
+        endDay: endKey,
+        profileId: pid,
+      );
+    }
     ref.read(selectedProfileProvider.notifier).set(pid);
     if (mounted) Navigator.of(context).pop();
   }
@@ -116,13 +167,22 @@ class _AddMedicationScreenState extends ConsumerState<AddMedicationScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final title = _editing ? l10n.editMedicine : l10n.addMedicine;
+
+    if (_loading) {
+      return Scaffold(
+        appBar: AppBar(title: Text(title)),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
     final locale = Localizations.localeOf(context).toString();
     final dateFmt = DateFormat.yMMMd(locale);
     final titleStyle = Theme.of(context).textTheme.titleMedium;
     final profiles = ref.watch(profilesProvider).value ?? const [];
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.addMedicine)),
+      appBar: AppBar(title: Text(title)),
       body: Form(
         key: _formKey,
         child: ListView(
@@ -204,8 +264,8 @@ class _AddMedicationScreenState extends ConsumerState<AddMedicationScreen> {
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.event_busy),
               title: Text(l10n.endDate),
-              subtitle: Text(
-                  _end == null ? l10n.noEndDate : dateFmt.format(_end!)),
+              subtitle:
+                  Text(_end == null ? l10n.noEndDate : dateFmt.format(_end!)),
               trailing: _end == null
                   ? null
                   : IconButton(

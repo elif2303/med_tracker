@@ -3,15 +3,41 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart' show WidgetsFlutterBinding;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../core/profile_utils.dart';
 import '../core/time_utils.dart';
 import '../data/database.dart';
+import '../features/alarm/alarm_request.dart';
 import '../l10n/app_localizations.dart';
+
+/// Bildirimdeki "Aldım"/"Ertele" düğmeleri uygulama kapalıyken de bunu çağırır.
+/// Ayrı bir izolatta çalışır, bu yüzden üst düzey ve işaretli olmalı.
+@pragma('vm:entry-point')
+@pragma('vm:entry-point')
+Future<void> notificationBackgroundHandler(NotificationResponse r) async {
+  debugPrint('MEDTRACKER bg handler: action=${r.actionId} id=${r.id}');
+  try {
+    WidgetsFlutterBinding.ensureInitialized();
+    DartPluginRegistrant.ensureInitialized();
+
+    // Önce sesi durdur: sonraki adımlar hata verse bile alarm susar
+    final id = r.id;
+    if (id != null && (r.actionId == 'taken' || r.actionId == 'snooze')) {
+      await FlutterLocalNotificationsPlugin().cancel(id: id);
+    }
+
+    await NotificationService.instance.handleInBackground(r);
+    debugPrint('MEDTRACKER bg handler: done');
+  } catch (e, st) {
+    debugPrint('MEDTRACKER bg handler error: $e\n$st');
+  }
+}
 
 class NotificationService {
   NotificationService._();
@@ -22,8 +48,11 @@ class NotificationService {
   Locale? _locale;
   Future<void> _queue = Future.value();
 
-  /// "Aldım" butonuna basılınca çağrılır (main.dart'ta bağlanır)
+  /// Ana izolatta "Aldım" için (main.dart'ta bağlanır)
   Future<void> Function(int reminderId)? onTaken;
+
+  /// Alarm/bildirime dokunulunca alarm ekranını açmak için (main.dart'ta bağlanır)
+  void Function(AlarmRequest request)? onOpened;
 
   static const _channelId = 'medication_reminders';
   static const _alarmChannelId = 'medication_alarms';
@@ -39,8 +68,8 @@ class NotificationService {
   static const _snoozeMinutes = 10;
   static const _datedWindowDays = 60;
 
-  Future<void> init() async {
-    if (kIsWeb) return;
+  Future<void> _setup() async {
+    if (_ready) return;
 
     tzdata.initializeTimeZones();
     final dynamic info = await FlutterTimezone.getLocalTimezone();
@@ -49,18 +78,34 @@ class NotificationService {
 
     await _plugin.initialize(
       settings: const InitializationSettings(
-        android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+        android: AndroidInitializationSettings('ic_notification'),
         iOS: DarwinInitializationSettings(),
       ),
-      onDidReceiveNotificationResponse: _handle,
+      onDidReceiveNotificationResponse: (r) => _handle(r),
+      onDidReceiveBackgroundNotificationResponse: notificationBackgroundHandler,
     );
     _ready = true;
+  }
 
+  Future<void> init() async {
+    if (kIsWeb) return;
+    await _setup();
+
+    // Uygulama kapalıyken bildirime dokunularak/alarm ile açıldıysa
     final launch = await _plugin.getNotificationAppLaunchDetails();
     if (launch?.didNotificationLaunchApp ?? false) {
       final r = launch!.notificationResponse;
-      if (r != null) await _handle(r);
+      if (r != null) await _handle(r, cold: true);
     }
+  }
+
+  /// Arka plan izolatında çağrılır
+  Future<void> handleInBackground(NotificationResponse r) async {
+    await _setup();
+    final prefs = await SharedPreferences.getInstance();
+    final code = prefs.getString('locale');
+    _locale = code == null ? null : Locale(code);
+    await _handle(r);
   }
 
   AndroidFlutterLocalNotificationsPlugin? get _android =>
@@ -79,9 +124,20 @@ class NotificationService {
         ?.requestPermissions(alert: true, badge: true, sound: true);
   }
 
+  /// Her açılışta çağrılır: sadece bildirim izni
+  Future<void> requestNotificationPermissionOnly() async {
+    if (!_ready) return;
+    await _android?.requestNotificationsPermission();
+  }
+
   Future<void> ensureAlarmPermissions() async {
     if (!_ready) return;
     await _android?.requestFullScreenIntentPermission();
+  }
+
+  Future<void> cancelNotification(int id) async {
+    if (!_ready || id < 0) return;
+    await _plugin.cancel(id: id);
   }
 
   Future<AppLocalizations> _l10n(Locale? chosen) {
@@ -115,11 +171,12 @@ class NotificationService {
         additionalFlags: alarm ? Int32List.fromList(<int>[4]) : null,
         timeoutAfter: alarm ? 120000 : null,
         enableVibration: true,
+        // showsUserInterface: false -> düğmeler uygulamayı açmadan arka planda çalışır
         actions: [
           AndroidNotificationAction('taken', l10n.iTookIt,
-              showsUserInterface: true),
+              showsUserInterface: false, cancelNotification: true),
           AndroidNotificationAction('snooze', l10n.snooze10,
-              showsUserInterface: true),
+              showsUserInterface: false, cancelNotification: true),
         ],
       ),
       iOS: const DarwinNotificationDetails(
@@ -140,7 +197,7 @@ class NotificationService {
       jsonEncode(
           {'id': reminderId, 'alarm': alarm, 'title': title, 'body': body});
 
-  /// Tüm planı baştan kurar. İstekler sıraya girer, aynı anda iki planlama çalışmaz.
+  /// Tüm planı baştan kurar. İstekler sıraya girer.
   Future<void> reschedule(
     List<ScheduleItem> items,
     Locale? locale, {
@@ -162,7 +219,13 @@ class NotificationService {
     if (!_ready) return;
     _locale = locale;
     final l10n = await _l10n(locale);
-    await _plugin.cancelAll();
+
+    // Bekleyen ertelenmiş (snooze) bildirimleri silme, gerisini temizle
+    final pending = await _plugin.pendingNotificationRequests();
+    for (final p in pending) {
+      if (p.id < _snoozeBase) await _plugin.cancel(id: p.id);
+    }
+
     final mode = await _mode();
     final now = tz.TZDateTime.now(tz.local);
     final todayKey = dayKeyOf(DateTime(now.year, now.month, now.day));
@@ -181,7 +244,6 @@ class NotificationService {
       final dated = item.endDay != null || item.startDay > todayKey;
 
       if (dated) {
-        // Bitiş tarihli ya da henüz başlamamış ilaç: günleri tek tek planla
         for (var offset = 0; offset < _datedWindowDays; offset++) {
           final day = DateTime(now.year, now.month, now.day + offset);
           final key = dayKeyOf(day);
@@ -204,7 +266,6 @@ class NotificationService {
           );
         }
       } else if (item.daysMask == 127) {
-        // Her gün: tek tekrarlayan bildirim
         var when = tz.TZDateTime(tz.local, now.year, now.month, now.day, h, m);
         if (!when.isAfter(now)) {
           when =
@@ -221,7 +282,6 @@ class NotificationService {
           payload: payload,
         );
       } else {
-        // Belirli günler: seçili her gün için haftalık tekrar
         for (var wd = 1; wd <= 7; wd++) {
           if (!maskHasDay(item.daysMask, wd)) continue;
           tz.TZDateTime? when;
@@ -266,7 +326,22 @@ class NotificationService {
     );
   }
 
-  Future<void> _handle(NotificationResponse r) async {
+  /// "Aldım": ana izolatta uygulamanın veritabanı, arka planda kendi bağlantımız
+  Future<void> _markTaken(int reminderId) async {
+    final cb = onTaken;
+    if (cb != null) {
+      await cb(reminderId);
+      return;
+    }
+    final db = AppDatabase();
+    try {
+      await db.markTaken(reminderId, dayKeyOf(DateTime.now()));
+    } finally {
+      await db.close();
+    }
+  }
+
+  Future<void> _handle(NotificationResponse r, {bool cold = false}) async {
     final raw = r.payload;
     if (raw == null) return;
     final Map<String, dynamic> p;
@@ -279,14 +354,36 @@ class NotificationService {
 
     switch (r.actionId) {
       case 'taken':
-        await _plugin.cancel(id: _snoozeBase + (id < 0 ? 0 : id));
-        if (id >= 0) await onTaken?.call(id);
+        if (id >= 0) {
+          await _plugin.cancel(id: _snoozeBase + id);
+          await _markTaken(id);
+        }
       case 'snooze':
-        await _snooze(p);
+        await _snoozeMap(p);
+      default:
+        // Bildirime ya da tam ekran alarma dokunuldu/alarm uygulamayı açtı
+        if (p['alarm'] == true) {
+          onOpened?.call(AlarmRequest(
+            reminderId: id,
+            notificationId: r.id ?? -1,
+            alarm: true,
+            title: p['title'] as String,
+            body: p['body'] as String,
+            cold: cold,
+          ));
+        }
     }
   }
 
-  Future<void> _snooze(Map<String, dynamic> p) async {
+  /// Alarm ekranından erteleme
+  Future<void> snooze(AlarmRequest req) => _snoozeMap({
+        'id': req.reminderId,
+        'alarm': req.alarm,
+        'title': req.title,
+        'body': req.body,
+      });
+
+  Future<void> _snoozeMap(Map<String, dynamic> p) async {
     final l10n = await _l10n(_locale);
     final id = p['id'] as int;
     await _plugin.zonedSchedule(

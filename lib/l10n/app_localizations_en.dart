@@ -199,4 +199,89 @@ class AppLocalizationsEn extends AppLocalizations {
   String reminderTitleFor(String profile, String name) {
     return '$profile: time for $name';
   }
+
+  @override
+  String get settings => 'Settings';
+
+  @override
+  String get showNameInNotification => 'Show person\'s name in notifications';
+
+  @override
+  String get showNameInNotificationHint =>
+      'Anyone who sees your lock screen can read it';
+
+  @override
+  String get testSection => 'Test';
+
+  @override
+  String get medicalDisclaimer =>
+      'Med Tracker is a reminder tool and does not provide medical advice. Always follow your doctor\'s instructions.';
+
+  @override
+  String get editMedicine => 'Edit medicine';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get next => 'Next';
+
+  @override
+  String get back => 'Back';
+
+  @override
+  String get obWelcomeTitle => 'Welcome to Med Tracker';
+
+  @override
+  String get obWelcomeBody =>
+      'Never miss a dose. Simple reminders for you and the people you care for.';
+
+  @override
+  String get obDisclaimerTitle => 'Before you start';
+
+  @override
+  String get obDataLocal =>
+      'Your medicines and history are stored only on this phone. If you delete the app or change phones, they are lost.';
+
+  @override
+  String get obAgree => 'I understand and agree';
+
+  @override
+  String get obPermTitle => 'Allow reminders';
+
+  @override
+  String get obPermBody =>
+      'To remind you on time, Med Tracker needs your permission:';
+
+  @override
+  String get obPermNotif => 'Notifications, to show your reminders';
+
+  @override
+  String get obPermExact =>
+      'Exact alarms, so reminders arrive on time and not minutes late';
+
+  @override
+  String get obAllow => 'Allow';
+
+  @override
+  String get obNotNow => 'Not now';
+
+  @override
+  String get obBatteryTitle => 'Keep reminders reliable';
+
+  @override
+  String get obBatteryBody =>
+      'Some phones (Samsung, Xiaomi, Huawei and others) pause apps to save battery, which can delay reminders. Open the settings, go to Battery and choose \"Unrestricted\".';
+
+  @override
+  String get obOpenSettings => 'Open settings';
+
+  @override
+  String get obGetStarted => 'Get started';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get privacyPolicy => 'Privacy policy';
 }

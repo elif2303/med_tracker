@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../../core/locale_provider.dart';
 import '../../core/time_utils.dart';
 import '../../data/database.dart';
 import '../../data/providers.dart';
 import '../../l10n/app_localizations.dart';
-import '../../notifications/notification_service.dart';
-import '../medications/add_medication_screen.dart';
+import '../medications/medication_form_screen.dart';
+import '../settings/settings_screen.dart';
 import '../profiles/profile_bar.dart';
-import '../settings/language_button.dart';
+
 
 enum _Period { morning, afternoon, evening, night }
 
@@ -50,7 +49,7 @@ class HomeScreen extends ConsumerWidget {
     final dayKey = dayKeyOf(selected);
 
     void openAdd() => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const AddMedicationScreen()),
+          MaterialPageRoute(builder: (_) => const MedicationFormScreen()),
         );
 
     Future<void> pickDate() async {
@@ -79,15 +78,12 @@ class HomeScreen extends ConsumerWidget {
             icon: const Icon(Icons.calendar_month),
             onPressed: pickDate,
           ),
-          const LanguageButton(),
-          PopupMenuButton<String>(
-            onSelected: (v) => NotificationService.instance
-                .scheduleTest(ref.read(localeProvider), alarm: v == 'alarm'),
-            itemBuilder: (_) => [
-              PopupMenuItem(
-                  value: 'notification', child: Text(l10n.testNotification)),
-              PopupMenuItem(value: 'alarm', child: Text(l10n.loudAlarm)),
-            ],
+          IconButton(
+            tooltip: l10n.settings,
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const SettingsScreen()),
+            ),
           ),
         ],
       ),
@@ -101,6 +97,7 @@ class HomeScreen extends ConsumerWidget {
             ),
           Expanded(
             child: dosesAsync.when(
+              skipLoadingOnReload: true,
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Center(child: Text('Error: $e')),
               data: (doses) {
@@ -161,6 +158,12 @@ class HomeScreen extends ConsumerWidget {
                                     ? db.unmarkTaken(d.reminderId, dayKey)
                                     : db.markTaken(d.reminderId, dayKey),
                             onDelete: () => _confirmDelete(context, db, d),
+                            onEdit: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => MedicationFormScreen(
+                                    medicationId: d.medicationId),
+                              ),
+                            ),
                           ),
                       ],
                   ],
@@ -433,12 +436,14 @@ class _DoseCard extends StatelessWidget {
     required this.future,
     required this.overdue,
     required this.onToggle,
+    required this.onEdit,
     required this.onDelete,
   });
   final DoseItem dose;
   final bool future;
   final bool overdue;
   final VoidCallback? onToggle;
+  final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   @override
@@ -524,9 +529,11 @@ class _DoseCard extends StatelessWidget {
                 ),
                 PopupMenuButton<String>(
                   onSelected: (v) {
+                    if (v == 'edit') onEdit();
                     if (v == 'delete') onDelete();
                   },
                   itemBuilder: (_) => [
+                    PopupMenuItem(value: 'edit', child: Text(l10n.edit)),
                     PopupMenuItem(
                         value: 'delete', child: Text(l10n.deleteMedicine)),
                   ],

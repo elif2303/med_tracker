@@ -4,6 +4,10 @@ import '../core/locale_provider.dart';
 import '../core/time_utils.dart';
 import '../notifications/notification_service.dart';
 import 'database.dart';
+import 'dart:ui' show Color;
+import 'package:shared_preferences/shared_preferences.dart';
+import '../core/profile_colors.dart';
+import '../core/settings_provider.dart';
 
 final databaseProvider = Provider<AppDatabase>((ref) {
   final db = AppDatabase();
@@ -29,11 +33,19 @@ final profilesProvider = StreamProvider<List<Profile>>((ref) {
   return ref.watch(databaseProvider).watchProfiles();
 });
 
-class SelectedProfileNotifier extends Notifier<int?> {
-  @override
-  int? build() => null;
+/// Uygulama açılışında main.dart bunu kayıtlı değerle doldurur
+final initialProfileIdProvider = Provider<int?>((ref) => null);
 
-  void set(int id) => state = id;
+class SelectedProfileNotifier extends Notifier<int?> {
+  static const _key = 'selected_profile';
+
+  @override
+  int? build() => ref.read(initialProfileIdProvider);
+
+  void set(int id) {
+    state = id;
+    SharedPreferences.getInstance().then((p) => p.setInt(_key, id));
+  }
 }
 
 final selectedProfileProvider =
@@ -45,6 +57,14 @@ final activeProfileIdProvider = Provider<int?>((ref) {
   if (profiles == null || profiles.isEmpty) return null;
   final selected = ref.watch(selectedProfileProvider);
   return profiles.any((p) => p.id == selected) ? selected : profiles.first.id;
+});
+
+/// Aktif profilin rengi: tema bunu kullanır
+final activeColorProvider = Provider<Color>((ref) {
+  final profiles = ref.watch(profilesProvider).value;
+  final id = ref.watch(activeProfileIdProvider);
+  final match = profiles?.where((p) => p.id == id).firstOrNull;
+  return Color(match?.colorValue ?? profileColors.first);
 });
 
 // ---------- Takvim ----------
@@ -87,11 +107,13 @@ final notificationSyncProvider = Provider<void>((ref) {
     NotificationService.instance.reschedule(
       items,
       locale,
-      showProfile: profiles.length > 1,
+      showProfile:
+          profiles.length > 1 && ref.read(showProfileInNotificationProvider),
     );
   }
 
   ref.listen(schedulesProvider, (_, __) => sync(), fireImmediately: true);
   ref.listen(profilesProvider, (_, __) => sync());
   ref.listen(localeProvider, (_, __) => sync());
+  ref.listen(showProfileInNotificationProvider, (_, __) => sync());
 });

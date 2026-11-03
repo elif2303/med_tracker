@@ -201,4 +201,89 @@ class AppLocalizationsTr extends AppLocalizations {
   String reminderTitleFor(String profile, String name) {
     return '$profile: $name zamanı';
   }
+
+  @override
+  String get settings => 'Ayarlar';
+
+  @override
+  String get showNameInNotification => 'Bildirimlerde kişinin adını göster';
+
+  @override
+  String get showNameInNotificationHint =>
+      'Kilit ekranını gören herkes okuyabilir';
+
+  @override
+  String get testSection => 'Test';
+
+  @override
+  String get medicalDisclaimer =>
+      'Med Tracker bir hatırlatma aracıdır, tıbbi tavsiye vermez. Her zaman doktorunuzun talimatlarına uyun.';
+
+  @override
+  String get editMedicine => 'İlacı düzenle';
+
+  @override
+  String get edit => 'Düzenle';
+
+  @override
+  String get next => 'İleri';
+
+  @override
+  String get back => 'Geri';
+
+  @override
+  String get obWelcomeTitle => 'Med Tracker\'a hoş geldin';
+
+  @override
+  String get obWelcomeBody =>
+      'Hiçbir dozu kaçırma. Sana ve baktığın kişilere basit hatırlatmalar.';
+
+  @override
+  String get obDisclaimerTitle => 'Başlamadan önce';
+
+  @override
+  String get obDataLocal =>
+      'İlaçların ve geçmişin yalnızca bu telefonda saklanır. Uygulamayı silersen ya da telefon değiştirirsen kaybolurlar.';
+
+  @override
+  String get obAgree => 'Anladım ve kabul ediyorum';
+
+  @override
+  String get obPermTitle => 'Hatırlatmalara izin ver';
+
+  @override
+  String get obPermBody =>
+      'Seni zamanında uyarabilmesi için Med Tracker\'ın iznine ihtiyacı var:';
+
+  @override
+  String get obPermNotif => 'Bildirimler: hatırlatmaları göstermek için';
+
+  @override
+  String get obPermExact =>
+      'Tam zamanlı alarmlar: hatırlatmalar dakikalarca gecikmeden gelsin diye';
+
+  @override
+  String get obAllow => 'İzin ver';
+
+  @override
+  String get obNotNow => 'Şimdi değil';
+
+  @override
+  String get obBatteryTitle => 'Hatırlatmalar güvenilir kalsın';
+
+  @override
+  String get obBatteryBody =>
+      'Bazı telefonlar (Samsung, Xiaomi, Huawei vb.) pil tasarrufu için uygulamaları durdurur ve hatırlatmalar gecikebilir. Ayarları aç, Pil bölümüne gir ve \"Sınırsız\" seç.';
+
+  @override
+  String get obOpenSettings => 'Ayarları aç';
+
+  @override
+  String get obGetStarted => 'Başla';
+
+  @override
+  String get close => 'Kapat';
+
+  @override
+  String get privacyPolicy => 'Gizlilik politikası';
 }

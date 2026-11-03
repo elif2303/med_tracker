@@ -455,6 +455,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{profile}: time for {name}'**
   String reminderTitleFor(String profile, String name);
+
+  /// No description provided for @settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settings;
+
+  /// No description provided for @showNameInNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Show person\'s name in notifications'**
+  String get showNameInNotification;
+
+  /// No description provided for @showNameInNotificationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Anyone who sees your lock screen can read it'**
+  String get showNameInNotificationHint;
+
+  /// No description provided for @testSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Test'**
+  String get testSection;
+
+  /// No description provided for @medicalDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Med Tracker is a reminder tool and does not provide medical advice. Always follow your doctor\'s instructions.'**
+  String get medicalDisclaimer;
+
+  /// No description provided for @editMedicine.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit medicine'**
+  String get editMedicine;
+
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// No description provided for @next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get next;
+
+  /// No description provided for @back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get back;
+
+  /// No description provided for @obWelcomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Med Tracker'**
+  String get obWelcomeTitle;
+
+  /// No description provided for @obWelcomeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Never miss a dose. Simple reminders for you and the people you care for.'**
+  String get obWelcomeBody;
+
+  /// No description provided for @obDisclaimerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Before you start'**
+  String get obDisclaimerTitle;
+
+  /// No description provided for @obDataLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Your medicines and history are stored only on this phone. If you delete the app or change phones, they are lost.'**
+  String get obDataLocal;
+
+  /// No description provided for @obAgree.
+  ///
+  /// In en, this message translates to:
+  /// **'I understand and agree'**
+  String get obAgree;
+
+  /// No description provided for @obPermTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow reminders'**
+  String get obPermTitle;
+
+  /// No description provided for @obPermBody.
+  ///
+  /// In en, this message translates to:
+  /// **'To remind you on time, Med Tracker needs your permission:'**
+  String get obPermBody;
+
+  /// No description provided for @obPermNotif.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications, to show your reminders'**
+  String get obPermNotif;
+
+  /// No description provided for @obPermExact.
+  ///
+  /// In en, this message translates to:
+  /// **'Exact alarms, so reminders arrive on time and not minutes late'**
+  String get obPermExact;
+
+  /// No description provided for @obAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get obAllow;
+
+  /// No description provided for @obNotNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get obNotNow;
+
+  /// No description provided for @obBatteryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep reminders reliable'**
+  String get obBatteryTitle;
+
+  /// No description provided for @obBatteryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Some phones (Samsung, Xiaomi, Huawei and others) pause apps to save battery, which can delay reminders. Open the settings, go to Battery and choose \"Unrestricted\".'**
+  String get obBatteryBody;
+
+  /// No description provided for @obOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get obOpenSettings;
+
+  /// No description provided for @obGetStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Get started'**
+  String get obGetStarted;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy'**
+  String get privacyPolicy;
 }
 
 class _AppLocalizationsDelegate

@@ -151,6 +151,7 @@ class AppDatabase extends _$AppDatabase {
         beforeOpen: (details) async {
           // Silinen ilacın saatleri ve kayıtları da silinsin diye
           await customStatement('PRAGMA foreign_keys = ON');
+          await customStatement('PRAGMA busy_timeout = 5000');
         },
       );
 
@@ -225,6 +226,66 @@ class AppDatabase extends _$AppDatabase {
 
   Future<void> deleteMedication(int medicationId) {
     return (delete(medications)..where((m) => m.id.equals(medicationId))).go();
+  }
+
+    /// Düzenleme ekranı için ilaç ve saatleri
+  Future<({Medication med, List<int> minutes})?> getMedicationForEdit(
+      int id) async {
+    final med = await (select(medications)..where((m) => m.id.equals(id)))
+        .getSingleOrNull();
+    if (med == null) return null;
+    final rems = await (select(reminders)
+          ..where((r) => r.medicationId.equals(id))
+          ..orderBy([(r) => OrderingTerm.asc(r.minuteOfDay)]))
+        .get();
+    return (med: med, minutes: rems.map((r) => r.minuteOfDay).toList());
+  }
+
+  /// Aynı kalan saatlerin kayıtları (alındı geçmişi) korunur,
+  /// kaldırılan saatlerin geçmişi silinir, yeni saatler eklenir.
+  Future<void> updateMedication({
+    required int id,
+    required String name,
+    required String dose,
+    required List<int> minutes,
+    required bool useAlarm,
+    required int daysMask,
+    required int startDay,
+    required int? endDay,
+    required int profileId,
+  }) {
+    return transaction(() async {
+      await (update(medications)..where((m) => m.id.equals(id))).write(
+        MedicationsCompanion(
+          name: Value(name),
+          dose: Value(dose),
+          useAlarm: Value(useAlarm),
+          daysMask: Value(daysMask),
+          startDay: Value(startDay),
+          endDay: Value(endDay),
+          profileId: Value(profileId),
+        ),
+      );
+
+      final existing = await (select(reminders)
+            ..where((r) => r.medicationId.equals(id)))
+          .get();
+      final keep = <int>{};
+      for (final r in existing) {
+        if (minutes.contains(r.minuteOfDay)) {
+          keep.add(r.minuteOfDay);
+        } else {
+          await (delete(reminders)..where((t) => t.id.equals(r.id))).go();
+        }
+      }
+      for (final m in minutes) {
+        if (!keep.contains(m)) {
+          await into(reminders).insert(
+            RemindersCompanion.insert(medicationId: id, minuteOfDay: m),
+          );
+        }
+      }
+    });
   }
 
   Future<void> markTaken(int reminderId, int dayKey) {

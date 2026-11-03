@@ -202,4 +202,91 @@ class AppLocalizationsDe extends AppLocalizations {
   String reminderTitleFor(String profile, String name) {
     return '$profile: Zeit für $name';
   }
+
+  @override
+  String get settings => 'Einstellungen';
+
+  @override
+  String get showNameInNotification =>
+      'Namen der Person in Benachrichtigungen anzeigen';
+
+  @override
+  String get showNameInNotificationHint =>
+      'Jeder, der den Sperrbildschirm sieht, kann es lesen';
+
+  @override
+  String get testSection => 'Test';
+
+  @override
+  String get medicalDisclaimer =>
+      'Med Tracker ist ein Erinnerungswerkzeug und bietet keine medizinische Beratung. Befolge immer die Anweisungen deines Arztes.';
+
+  @override
+  String get editMedicine => 'Medikament bearbeiten';
+
+  @override
+  String get edit => 'Bearbeiten';
+
+  @override
+  String get next => 'Weiter';
+
+  @override
+  String get back => 'Zurück';
+
+  @override
+  String get obWelcomeTitle => 'Willkommen bei Med Tracker';
+
+  @override
+  String get obWelcomeBody =>
+      'Verpasse keine Einnahme mehr. Einfache Erinnerungen für dich und die Menschen, die du betreust.';
+
+  @override
+  String get obDisclaimerTitle => 'Bevor es losgeht';
+
+  @override
+  String get obDataLocal =>
+      'Deine Medikamente und dein Verlauf werden nur auf diesem Handy gespeichert. Wenn du die App löschst oder das Handy wechselst, gehen sie verloren.';
+
+  @override
+  String get obAgree => 'Ich habe verstanden und stimme zu';
+
+  @override
+  String get obPermTitle => 'Erinnerungen erlauben';
+
+  @override
+  String get obPermBody =>
+      'Damit Med Tracker dich pünktlich erinnern kann, braucht die App deine Erlaubnis:';
+
+  @override
+  String get obPermNotif =>
+      'Benachrichtigungen, um deine Erinnerungen anzuzeigen';
+
+  @override
+  String get obPermExact =>
+      'Exakte Alarme, damit Erinnerungen pünktlich und nicht Minuten zu spät kommen';
+
+  @override
+  String get obAllow => 'Erlauben';
+
+  @override
+  String get obNotNow => 'Jetzt nicht';
+
+  @override
+  String get obBatteryTitle => 'Erinnerungen zuverlässig halten';
+
+  @override
+  String get obBatteryBody =>
+      'Einige Handys (Samsung, Xiaomi, Huawei u. a.) pausieren Apps, um Akku zu sparen, wodurch sich Erinnerungen verzögern können. Öffne die Einstellungen, gehe zu Akku und wähle „Uneingeschränkt“.';
+
+  @override
+  String get obOpenSettings => 'Einstellungen öffnen';
+
+  @override
+  String get obGetStarted => 'Los geht\'s';
+
+  @override
+  String get close => 'Schließen';
+
+  @override
+  String get privacyPolicy => 'Datenschutzerklärung';
 }
